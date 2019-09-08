@@ -9,36 +9,35 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 #My interactive map
-This map generates 180 random lat/longitude points in a normal distribution
+This map loads data points from the NOAA volcano database, 1750-2019
 
-
+```{r, echo = FALSE,message = FALSE}
 library(leaflet)
-my_map <- leaflet() %>% addTiles() #apply mymap to addTiles then sets my_map
-my_map = leaflet()
-my_map = addTiles(my_map)
-my_map
-#Make some markers
-latitude<-rnorm(180,0,50) #random all over the world
-longitude<-rnorm(180,0,80) 
-for(i in 1:100) {
-  popup<-paste("PopUp:", i, sep = " ")
-  my_map <- my_map %>% 
-    addMarkers(lat = latitude[i],
-               lng = longitude[i],
-               popup)
-}
-my_map
+library(ggplot2)
+library(tidyverse)
 
-
-```
-{r}
+#load some markers from the volcanos dataset
+my.df<-read.delim("v2.txt",header=TRUE)
 #Run some stats on the co-ordinates
-plot(latitude)
-plot(longitude)
-my.df <- data.frame(latitude, longitude)
+plot(my.df$Latitude)
+plot(my.df$Longitude)
 ggplot(data = my.df, 
-       aes(x = reads, y = log2(number + 1), color = condition)) +
+       aes(x = my.df$Latitude, y = my.df$Longitude, color = Year)) +
     geom_point() +
-    geom_smooth(se = FALSE, method = "gam", formula = y ~ s(log(x)))
+    geom_smooth() +
+   scale_color_gradient(low="blue", high="red")
+
+#Run a histogram showing volcano activity over the years
+ggplot(my.df, aes(x=Year)) + 
+  geom_histogram(colour="black", fill="white", binwidth=1)
+
+my.df %>% 
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers()
 ```
+
+```{r}
+```
+
 
